@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Flask Revision Project</title>
+
+<link
+rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<nav>
+
+<a href="/">Home</a> |
+
+<a href="/about">About</a> |
+
+<a href="/contact">Contact</a> |
+
+<a href="/login">Login</a>
+
+</nav>
+
+<hr>
+
+{% block content %}
+
+{% endblock %}
+
+</body>
+
+</html>
