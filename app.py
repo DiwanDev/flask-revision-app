@@ -154,4 +154,20 @@ def signup():
         return redirect(url_for("dashboard"))
 
     return render_template("signup.html")
+@app.route("/products")
+def products():
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute("SELECT * FROM products ORDER BY created_at DESC")
+
+    product_list = cursor.fetchall()
+
+    cursor.close()
+
+    return render_template(
+        "products.html",
+        products=product_list
+    )
+
+
 app.run(debug=True)
