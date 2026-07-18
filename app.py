@@ -5,8 +5,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 app = Flask(__name__)
+app.secret_key = "mysecretkey"
+
 db = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -17,24 +18,27 @@ db = mysql.connector.connect(
 if db.is_connected():
     print("Connected to MySQL successfully!")
 
-app.secret_key = "mysecretkey"
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+    if "username" in session:
+        return redirect(url_for("products"))
+
+    return render_template("login.html")
 
 
 @app.route("/about")
 def about():
     return render_template("about.html")
 
+
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
 
+
 @app.route("/dashboard")
 def dashboard():
-
     username = session.get("username")
 
     if username is None:
@@ -44,28 +48,24 @@ def dashboard():
         "dashboard.html",
         username=username
     )
-@app.route("/logout")
-def logout():
 
-    session.pop("username", None)
-
-    return redirect(url_for("login"))
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    if "username" in session:
+        return redirect(url_for("products"))
 
     if request.method == "POST":
-
         username = request.form.get("username")
         password = request.form.get("password")
 
-        if username == "":
+        if not username:
             return render_template(
                 "login.html",
                 message="Username is required"
             )
 
-        if password == "":
+        if not password:
             return render_template(
                 "login.html",
                 message="Password is required"
@@ -74,18 +74,20 @@ def login():
         cursor = db.cursor(dictionary=True)
 
         cursor.execute(
-            "SELECT * FROM users WHERE username = %s AND password = %s",
+            """
+            SELECT *
+            FROM users
+            WHERE username = %s AND password = %s
+            """,
             (username, password)
         )
 
         user = cursor.fetchone()
-
         cursor.close()
 
         if user:
             session["username"] = user["username"]
-
-            return redirect(url_for("dashboard"))
+            return redirect(url_for("products"))
 
         return render_template(
             "login.html",
@@ -93,32 +95,21 @@ def login():
         )
 
     return render_template("login.html")
-@app.route("/test-db")
-def test_db():
-    cursor = db.cursor()
 
-    cursor.execute("SELECT * FROM students")
 
-    students = cursor.fetchall()
-
-    cursor.close()
-
-    return str(students)
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
-
     if request.method == "POST":
-
         username = request.form.get("username")
         password = request.form.get("password")
 
-        if username == "":
+        if not username:
             return render_template(
                 "signup.html",
                 message="Username is required"
             )
 
-        if password == "":
+        if not password:
             return render_template(
                 "signup.html",
                 message="Password is required"
@@ -127,7 +118,11 @@ def signup():
         cursor = db.cursor(dictionary=True)
 
         cursor.execute(
-            "SELECT * FROM users WHERE username = %s",
+            """
+            SELECT *
+            FROM users
+            WHERE username = %s
+            """,
             (username,)
         )
 
@@ -142,32 +137,70 @@ def signup():
             )
 
         cursor.execute(
-            "INSERT INTO users (username, password) VALUES (%s, %s)",
+            """
+            INSERT INTO users (username, password)
+            VALUES (%s, %s)
+            """,
             (username, password)
         )
 
         db.commit()
         cursor.close()
 
-        session["username"] = username
-
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("login"))
 
     return render_template("signup.html")
+
+
 @app.route("/products")
 def products():
+    if "username" not in session:
+        return redirect(url_for("login"))
+
     cursor = db.cursor(dictionary=True)
-
-    cursor.execute("SELECT * FROM products ORDER BY created_at DESC")
-
+    cursor.execute("SELECT * FROM products")
     product_list = cursor.fetchall()
-
     cursor.close()
 
     return render_template(
         "products.html",
-        products=product_list
+        products=product_list,
+        username=session["username"]
     )
 
 
-app.run(debug=True)
+@app.route("/add-to-cart", methods=["POST"])
+def add_to_cart():
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    product_id = request.form.get("product_id")
+
+    if "cart" not in session:
+        session["cart"] = []
+
+    cart = session["cart"]
+    cart.append(product_id)
+    session["cart"] = cart
+
+    return redirect(url_for("products"))
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+
+@app.route("/test-db")
+def test_db():
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM students")
+    students = cursor.fetchall()
+    cursor.close()
+
+    return str(students)
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
