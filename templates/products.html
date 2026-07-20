@@ -4,6 +4,10 @@
 
 <h1>Deman Products</h1>
 
+<a href="{{ url_for('cart') }}">
+    View Cart ({{ session.get("cart", []) | length }})
+</a>
+
 <div class="products-container">
 
     {% for product in products %}

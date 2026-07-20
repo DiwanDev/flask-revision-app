@@ -201,6 +201,82 @@ def test_db():
 
     return str(students)
 
+@app.route("/cart")
+def cart():
+
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    cart_ids = session.get("cart", [])
+
+    cart_products = []
+
+    cursor = db.cursor(dictionary=True)
+
+    for product_id in cart_ids:
+
+        cursor.execute(
+            "SELECT * FROM products WHERE id = %s",
+            (product_id,)
+        )
+
+        product = cursor.fetchone()
+
+        if product:
+            cart_products.append(product)
+
+    cursor.close()
+
+    return render_template(
+        "cart.html",
+        cart_products=cart_products
+    )
+@app.route("/checkout", methods=["POST"])
+def checkout():
+
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    cart_ids = session.get("cart", [])
+
+    if not cart_ids:
+        return redirect(url_for("cart"))
+
+    cursor = db.cursor(dictionary=True)
+
+    for product_id in cart_ids:
+
+        cursor.execute(
+            "SELECT stock FROM products WHERE id = %s",
+            (product_id,)
+        )
+
+        product = cursor.fetchone()
+
+        if not product or product["stock"] <= 0:
+            cursor.close()
+
+            return render_template(
+                "cart.html",
+                cart_products=[],
+                message="One of the products is out of stock."
+            )
+
+        cursor.execute(
+            """
+            UPDATE products
+            SET stock = stock - 1
+            WHERE id = %s
+            """,
+            (product_id,)
+        )
+
+    db.commit()
+    cursor.close()
+
+    session["cart"] = []
+
+    return redirect(url_for("products"))
 
 if __name__ == "__main__":
     app.run(debug=True)
