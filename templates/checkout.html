@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="checkout-page">
+
+    <div class="checkout-header">
+        <h1>Deman Checkout</h1>
+        <p>Complete your delivery information</p>
+    </div>
+
+    <form
+        action="{{ url_for('place_order') }}"
+        method="POST"
+        onsubmit="return confirm('Are you sure you want to place this order?');"
+    >
+
+        <div class="checkout-layout">
+
+            <div class="checkout-left">
+
+                <div class="checkout-section">
+
+                    <h2>1. Delivery address</h2>
+
+                    <label for="full_name">
+                        Full name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="full_name"
+                        name="full_name"
+                        required
+                    >
+
+                    <label for="phone">
+                        Mobile number
+                    </label>
+
+                    <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        placeholder="10-digit mobile number"
+                        required
+                    >
+
+                    <label for="pincode">
+                        PIN code
+                    </label>
+
+                    <input
+                        type="text"
+                        id="pincode"
+                        name="pincode"
+                        required
+                    >
+
+                    <label for="house">
+                        Flat, house number, building
+                    </label>
+
+                    <input
+                        type="text"
+                        id="house"
+                        name="house"
+                        required
+                    >
+
+                    <label for="area">
+                        Area, street, sector, village
+                    </label>
+
+                    <input
+                        type="text"
+                        id="area"
+                        name="area"
+                        required
+                    >
+
+                    <label for="landmark">
+                        Landmark
+                    </label>
+
+                    <input
+                        type="text"
+                        id="landmark"
+                        name="landmark"
+                        placeholder="Optional"
+                    >
+
+                    <div class="address-row">
+
+                        <div>
+                            <label for="city">
+                                City
+                            </label>
+
+                            <input
+                                type="text"
+                                id="city"
+                                name="city"
+                                required
+                            >
+                        </div>
+
+                        <div>
+                            <label for="state">
+                                State
+                            </label>
+
+                            <input
+                                type="text"
+                                id="state"
+                                name="state"
+                                required
+                            >
+                        </div>
+
+                    </div>
+
+                    <label for="country">
+                        Country
+                    </label>
+
+                    <select
+                        id="country"
+                        name="country"
+                        required
+                    >
+                        <option value="">Select country</option>
+                        <option value="India">India</option>
+                        <option value="United States">United States</option>
+                        <option value="Canada">Canada</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                    </select>
+
+                    <label for="instructions">
+                        Delivery instructions
+                    </label>
+
+                    <textarea
+                        id="instructions"
+                        name="instructions"
+                        rows="4"
+                        placeholder="For example: Leave the package with security"
+                    ></textarea>
+
+                </div>
+
+                <div class="checkout-section">
+
+                    <h2>2. Payment method</h2>
+
+                    <label class="payment-option">
+
+                        <input
+                            type="radio"
+                            name="payment_method"
+                            value="Cash on Delivery"
+                            required
+                        >
+
+                        Cash on Delivery
+
+                    </label>
+
+                    <label class="payment-option">
+
+                        <input
+                            type="radio"
+                            name="payment_method"
+                            value="Online Payment Demo"
+                            required
+                        >
+
+                        Online Payment — Demo only
+
+                    </label>
+
+                    <p class="payment-note">
+                        Real card payments are not connected yet.
+                    </p>
+
+                </div>
+
+                <div class="checkout-section">
+
+                    <h2>3. Review items</h2>
+
+                    {% for product in cart_products %}
+
+                        <div class="checkout-product">
+
+                            <img
+                                src="{{ product.image_url }}"
+                                alt="{{ product.name }}"
+                            >
+
+                            <div>
+                                <h3>{{ product.name }}</h3>
+
+                                <p class="checkout-price">
+                                    ₹{{ product.price }}
+                                </p>
+
+                                <p>
+                                    Available stock: {{ product.stock }}
+                                </p>
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+            <div class="order-summary">
+
+                <button type="submit" class="place-order-button">
+                    Place Your Order
+                </button>
+
+                <p class="order-message">
+                    By placing your order, you agree to Deman's
+                    conditions of use.
+                </p>
+
+                <hr>
+
+                <h2>Order Summary</h2>
+
+                <div class="summary-line">
+                    <span>Items:</span>
+                    <span>₹{{ "%.2f"|format(total_price) }}</span>
+                </div>
+
+                <div class="summary-line">
+                    <span>Delivery:</span>
+                    <span>₹0.00</span>
+                </div>
+
+                <hr>
+
+                <div class="summary-total">
+                    <span>Order Total:</span>
+                    <span>₹{{ "%.2f"|format(total_price) }}</span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

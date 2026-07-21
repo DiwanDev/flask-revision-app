@@ -26,15 +26,9 @@
 
     {% endfor %}
 
-    <form
-        action="{{ url_for('checkout') }}"
-        method="POST"
-        onsubmit="return confirm('Do you want to place this order?');"
-    >
-        <button type="submit">
-            Checkout
-        </button>
-    </form>
+    <a href="{{ url_for('checkout') }}" class="checkout-button">
+    Proceed to Checkout
+</a>
 
 {% else %}
 

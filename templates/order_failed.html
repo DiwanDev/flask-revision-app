@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="order-result-page">
+
+    <div class="failed-icon">
+        !
+    </div>
+
+    <h1>Order could not be placed</h1>
+
+    <p>
+        {{ message }}
+    </p>
+
+    <a href="{{ url_for('cart') }}" class="continue-shopping-button">
+        Return to Cart
+    </a>
+
+</div>
+
+{% endblock %}

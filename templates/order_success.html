@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="order-result-page">
+
+    <div class="success-icon">
+        ✓
+    </div>
+
+    <h1>Order placed successfully!</h1>
+
+    <p>
+        Thank you, <strong>{{ full_name }}</strong>.
+    </p>
+
+    <p>
+        Your order will be delivered to:
+    </p>
+
+    <div class="delivery-address">
+
+        <p>
+            {{ full_name }}
+        </p>
+
+        <p>
+            {{ house }}, {{ area }}
+        </p>
+
+        {% if landmark %}
+            <p>
+                Landmark: {{ landmark }}
+            </p>
+        {% endif %}
+
+        <p>
+            {{ city }}, {{ state }} - {{ pincode }}
+        </p>
+
+        <p>
+            {{ country }}
+        </p>
+
+        <p>
+            Phone: {{ phone }}
+        </p>
+
+        <p>
+            Payment: {{ payment_method }}
+        </p>
+
+    </div>
+
+    <a href="{{ url_for('products') }}" class="continue-shopping-button">
+        Continue Shopping
+    </a>
+
+</div>
+
+{% endblock %}
