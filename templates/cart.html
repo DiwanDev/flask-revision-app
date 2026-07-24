@@ -1,39 +1,108 @@
 {% extends "base.html" %}
 
+{% block title %}
+    Shopping Cart
+{% endblock %}
+
 {% block content %}
 
-<h1>Your Cart</h1>
+<div class="cart-page">
 
-{% if cart_products %}
+    <h1>Your Shopping Cart</h1>
 
-    {% for product in cart_products %}
+    {% if cart_items %}
 
-        <div class="product-card">
+        {% for item in cart_items %}
 
-            <img
-                src="{{ product.image_url }}"
-                alt="{{ product.name }}"
-                class="product-image"
+            <div class="cart-item">
+
+                <img
+                    src="{{ url_for('static', filename=item.image_url) }}"
+                    alt="{{ item.name }}"
+                    class="cart-product-image"
+                >
+
+                <div class="cart-product-details">
+
+                    <h2>
+                        {{ item.name }}
+                    </h2>
+
+                    <p>
+                        {{ item.description }}
+                    </p>
+
+                    <p class="cart-price">
+                        Price:
+                        ₹{{ "%.2f"|format(item.price) }}
+                    </p>
+
+                    <p>
+                        Quantity:
+                        {{ item.quantity }}
+                    </p>
+
+                    <p>
+                        Subtotal:
+                        ₹{{ "%.2f"|format(item.subtotal) }}
+                    </p>
+
+                    <form
+                        action="{{ url_for('remove_from_cart', product_id=item.id) }}"
+                        method="POST"
+                    >
+
+                        <button
+                            type="submit"
+                            class="remove-cart-button"
+                            onclick="return confirm('Are you sure you want to remove this item from your cart?');"
+                        >
+                            Remove
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+        <div class="cart-total">
+
+            <h2>
+                Total:
+                ₹{{ "%.2f"|format(total) }}
+            </h2>
+
+            <a
+                href="{{ url_for('checkout') }}"
+                class="checkout-button"
             >
-
-            <h2>{{ product.name }}</h2>
-
-            <p>₹{{ product.price }}</p>
-
-            <p>Available stock: {{ product.stock }}</p>
+                Proceed to Checkout
+            </a>
 
         </div>
 
-    {% endfor %}
+    {% else %}
 
-    <a href="{{ url_for('checkout') }}" class="checkout-button">
-    Proceed to Checkout
-</a>
+        <div class="empty-cart">
 
-{% else %}
+            <h2>
+                Your cart is empty
+            </h2>
 
-    <p>Your cart is empty.</p>
+            <a
+                href="{{ url_for('products') }}"
+                class="continue-shopping-button"
+            >
+                Continue Shopping
+            </a>
 
-{% endif %}
+        </div>
+
+    {% endif %}
+
+</div>
 
 {% endblock %}

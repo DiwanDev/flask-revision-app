@@ -1,13 +1,23 @@
 {% extends "base.html" %}
 
+{% block title %}
+    Deman Checkout
+{% endblock %}
+
 {% block content %}
 
 <div class="checkout-page">
 
     <div class="checkout-header">
+
         <h1>Deman Checkout</h1>
-        <p>Complete your delivery information</p>
+
+        <p>
+            Complete your delivery information
+        </p>
+
     </div>
+
 
     <form
         action="{{ url_for('place_order') }}"
@@ -17,11 +27,20 @@
 
         <div class="checkout-layout">
 
+
+            <!-- LEFT SIDE -->
+
             <div class="checkout-left">
+
+
+                <!-- DELIVERY ADDRESS -->
 
                 <div class="checkout-section">
 
-                    <h2>1. Delivery address</h2>
+                    <h2>
+                        1. Delivery address
+                    </h2>
+
 
                     <label for="full_name">
                         Full name
@@ -33,6 +52,7 @@
                         name="full_name"
                         required
                     >
+
 
                     <label for="phone">
                         Mobile number
@@ -46,6 +66,7 @@
                         required
                     >
 
+
                     <label for="pincode">
                         PIN code
                     </label>
@@ -56,6 +77,7 @@
                         name="pincode"
                         required
                     >
+
 
                     <label for="house">
                         Flat, house number, building
@@ -68,6 +90,7 @@
                         required
                     >
 
+
                     <label for="area">
                         Area, street, sector, village
                     </label>
@@ -78,6 +101,7 @@
                         name="area"
                         required
                     >
+
 
                     <label for="landmark">
                         Landmark
@@ -90,9 +114,11 @@
                         placeholder="Optional"
                     >
 
+
                     <div class="address-row">
 
                         <div>
+
                             <label for="city">
                                 City
                             </label>
@@ -103,9 +129,12 @@
                                 name="city"
                                 required
                             >
+
                         </div>
 
+
                         <div>
+
                             <label for="state">
                                 State
                             </label>
@@ -116,9 +145,11 @@
                                 name="state"
                                 required
                             >
+
                         </div>
 
                     </div>
+
 
                     <label for="country">
                         Country
@@ -129,12 +160,29 @@
                         name="country"
                         required
                     >
-                        <option value="">Select country</option>
-                        <option value="India">India</option>
-                        <option value="United States">United States</option>
-                        <option value="Canada">Canada</option>
-                        <option value="United Kingdom">United Kingdom</option>
+
+                        <option value="">
+                            Select country
+                        </option>
+
+                        <option value="India">
+                            India
+                        </option>
+
+                        <option value="United States">
+                            United States
+                        </option>
+
+                        <option value="Canada">
+                            Canada
+                        </option>
+
+                        <option value="United Kingdom">
+                            United Kingdom
+                        </option>
+
                     </select>
+
 
                     <label for="instructions">
                         Delivery instructions
@@ -149,9 +197,15 @@
 
                 </div>
 
+
+                <!-- PAYMENT METHOD -->
+
                 <div class="checkout-section">
 
-                    <h2>2. Payment method</h2>
+                    <h2>
+                        2. Payment method
+                    </h2>
+
 
                     <label class="payment-option">
 
@@ -166,6 +220,7 @@
 
                     </label>
 
+
                     <label class="payment-option">
 
                         <input
@@ -179,38 +234,83 @@
 
                     </label>
 
+
                     <p class="payment-note">
+
                         Real card payments are not connected yet.
+
                     </p>
 
                 </div>
 
+
+                <!-- REVIEW ITEMS -->
+
                 <div class="checkout-section">
 
-                    <h2>3. Review items</h2>
+                    <h2>
+                        3. Review items
+                    </h2>
+
 
                     {% for product in cart_products %}
 
                         <div class="checkout-product">
 
+
                             <img
-                                src="{{ product.image_url }}"
+                                src="{{ url_for('static', filename=product.image_url) }}"
                                 alt="{{ product.name }}"
                             >
 
+
                             <div>
-                                <h3>{{ product.name }}</h3>
+
+                                <h3>
+                                    {{ product.name }}
+                                </h3>
+
 
                                 <p class="checkout-price">
-                                    ₹{{ product.price }}
+
+                                    Price:
+                                    ₹{{ "%.2f"|format(product.price) }}
+
                                 </p>
 
+
                                 <p>
-                                    Available stock: {{ product.stock }}
+
+                                    Quantity:
+                                    {{ product.quantity }}
+
                                 </p>
+
+
+                                <p>
+
+                                    Subtotal:
+                                    ₹{{ "%.2f"|format(product.subtotal) }}
+
+                                </p>
+
+
+                                <p>
+
+                                    Available stock:
+                                    {{ product.stock }}
+
+                                </p>
+
                             </div>
 
                         </div>
+
+                    {% else %}
+
+                        <p>
+                            No products are available for checkout.
+                        </p>
 
                     {% endfor %}
 
@@ -218,36 +318,77 @@
 
             </div>
 
+
+            <!-- RIGHT SIDE ORDER SUMMARY -->
+
             <div class="order-summary">
 
-                <button type="submit" class="place-order-button">
+
+                <button
+                    type="submit"
+                    class="place-order-button"
+                >
+
                     Place Your Order
+
                 </button>
 
+
                 <p class="order-message">
+
                     By placing your order, you agree to Deman's
                     conditions of use.
+
                 </p>
 
-                <hr>
-
-                <h2>Order Summary</h2>
-
-                <div class="summary-line">
-                    <span>Items:</span>
-                    <span>₹{{ "%.2f"|format(total_price) }}</span>
-                </div>
-
-                <div class="summary-line">
-                    <span>Delivery:</span>
-                    <span>₹0.00</span>
-                </div>
 
                 <hr>
+
+
+                <h2>
+                    Order Summary
+                </h2>
+
+
+                <div class="summary-line">
+
+                    <span>
+                        Items:
+                    </span>
+
+                    <span>
+                        ₹{{ "%.2f"|format(total_price) }}
+                    </span>
+
+                </div>
+
+
+                <div class="summary-line">
+
+                    <span>
+                        Delivery:
+                    </span>
+
+                    <span>
+                        ₹0.00
+                    </span>
+
+                </div>
+
+
+                <hr>
+
 
                 <div class="summary-total">
-                    <span>Order Total:</span>
-                    <span>₹{{ "%.2f"|format(total_price) }}</span>
+
+                    <span>
+                        Order Total:
+                    </span>
+
+                    <span>
+                        ₹{{ "%.2f"|format(total_price) }}
+                    </span>
+
                 </div>
 
             </div>

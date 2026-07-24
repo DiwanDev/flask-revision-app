@@ -1,36 +1,218 @@
 <!DOCTYPE html>
-
-<html>
+<html lang="en">
 
 <head>
 
-<title>Flask Revision Project</title>
+    <meta charset="UTF-8">
 
-<link
-rel="stylesheet"
-href="{{ url_for('static', filename='style.css') }}">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {% block title %}
+            Deman Shopping
+        {% endblock %}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
 
 </head>
 
 <body>
 
-<nav>
+    <!-- Main Amazon-style navbar -->
+    <header class="main-navbar">
 
-<a href="/">Home</a> |
+        <!-- Website logo -->
+        <div class="navbar-logo">
 
-<a href="/about">About</a> |
+            <a href="{{ url_for('products') }}">
+                Deman
+                <span>.in</span>
+            </a>
 
-<a href="/contact">Contact</a> |
+        </div>
 
-<a href="/login">Login</a>
 
-</nav>
+        {% if session.get("username") %}
 
-<hr>
+            <!-- Large search bar -->
+            <div class="navbar-search">
 
-{% block content %}
+                <form
+                    action="{{ url_for('products') }}"
+                    method="GET"
+                >
 
-{% endblock %}
+                    <select name="category">
+
+                        <option value="">
+                            All
+                        </option>
+
+                        <option value="Electronics">
+                            Electronics
+                        </option>
+
+                        <option value="Books">
+                            Books
+                        </option>
+
+                        <option value="Fashion">
+                            Fashion
+                        </option>
+
+                        <option value="Bags">
+                            Bags
+                        </option>
+
+                    </select>
+
+                    <input
+                        type="text"
+                        name="search"
+                        placeholder="Search Deman.in"
+                        value="{{ search if search is defined else '' }}"
+                    >
+
+                    <button type="submit">
+                        &#128269;
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- Right side options -->
+            <div class="navbar-actions">
+
+                <div class="navbar-account">
+
+                    <span class="small-text">
+                        Hello, {{ session.get("username") }}
+                    </span>
+
+                    <span class="large-text">
+                        Account
+                    </span>
+
+                </div>
+
+
+                <a
+                    href="{{ url_for('place_order') }}"
+                    class="navbar-option"
+                >
+
+                    <span class="small-text">
+                        Returns
+                    </span>
+
+                    <span class="large-text">
+                        & Orders
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="{{ url_for('cart') }}"
+                    class="navbar-cart"
+                >
+
+                    <span class="cart-symbol">
+                        &#128722;
+                    </span>
+
+                    <span>
+                        Cart
+                    </span>
+
+                </a>
+
+            </div>
+
+        {% else %}
+
+            <!-- Login and signup for logged-out users -->
+            <div class="navbar-actions">
+
+                <a
+                    href="{{ url_for('login') }}"
+                    class="navbar-option"
+                >
+                    Login
+                </a>
+
+                <a
+                    href="{{ url_for('signup') }}"
+                    class="navbar-option"
+                >
+                    Signup
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </header>
+
+
+    {% if session.get("username") %}
+
+        <!-- Second Amazon-style menu bar -->
+        <nav class="secondary-navbar">
+
+            <a href="{{ url_for('products') }}">
+                &#9776; All
+            </a>
+
+            <a href="{{ url_for('products') }}">
+                Home
+            </a>
+
+            <a href="{{ url_for('products', category='Electronics') }}">
+                Electronics
+            </a>
+
+            <a href="{{ url_for('products', category='Books') }}">
+                Books
+            </a>
+
+            <a href="{{ url_for('products', category='Fashion') }}">
+                Fashion
+            </a>
+
+            <a href="{{ url_for('products', category='Bags') }}">
+                Bags
+            </a>
+
+            <a href="{{ url_for('place_order') }}">
+                Orders
+            </a>
+
+            <a href="{{ url_for('logout') }}">
+                Logout
+            </a>
+
+        </nav>
+
+    {% endif %}
+
+
+    <main class="main-content">
+
+        {% block content %}
+
+        {% endblock %}
+
+    </main>
 
 </body>
 
