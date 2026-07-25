@@ -28,10 +28,33 @@
                         {{ item.name }}
                     </h2>
 
-                    <p>
-                        {{ item.description }}
-                    </p>
+                   <div class="quantity-control">
 
+    <span>Quantity:</span>
+
+    <form
+        action="{{ url_for('decrease_cart', product_id=item.id) }}"
+        method="POST"
+    >
+        <button type="submit" class="quantity-button">
+            −
+        </button>
+    </form>
+
+    <span class="quantity-number">
+        {{ item.quantity }}
+    </span>
+
+    <form
+        action="{{ url_for('increase_cart', product_id=item.id) }}"
+        method="POST"
+    >
+        <button type="submit" class="quantity-button">
+            +
+        </button>
+    </form>
+
+</div>
                     <p class="cart-price">
                         Price:
                         ₹{{ "%.2f"|format(item.price) }}

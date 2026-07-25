@@ -408,7 +408,47 @@ def add_to_cart(product_id):
 # =========================================
 # VIEW CART
 # =========================================
+@app.route("/increase-cart/<int:product_id>", methods=["POST"])
+def increase_cart(product_id):
 
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    username = session["username"]
+
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT cart.quantity, products.stock
+        FROM cart
+        JOIN products
+        ON cart.product_id = products.id
+        WHERE cart.username = %s
+        AND cart.product_id = %s
+        """,
+        (username, product_id)
+    )
+
+    item = cursor.fetchone()
+
+    if item and item["quantity"] < item["stock"]:
+
+        cursor.execute(
+            """
+            UPDATE cart
+            SET quantity = quantity + 1
+            WHERE username = %s
+            AND product_id = %s
+            """,
+            (username, product_id)
+        )
+
+        db.commit()
+
+    cursor.close()
+
+    return redirect(url_for("cart"))
 @app.route("/cart")
 def cart():
 
@@ -452,6 +492,58 @@ def cart():
         cart_items=cart_items,
         total=total
     )
+@app.route("/decrease-cart/<int:product_id>", methods=["POST"])
+def decrease_cart(product_id):
+
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    username = session["username"]
+
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT quantity
+        FROM cart
+        WHERE username = %s
+        AND product_id = %s
+        """,
+        (username, product_id)
+    )
+
+    item = cursor.fetchone()
+
+    if item:
+
+        if item["quantity"] > 1:
+
+            cursor.execute(
+                """
+                UPDATE cart
+                SET quantity = quantity - 1
+                WHERE username = %s
+                AND product_id = %s
+                """,
+                (username, product_id)
+            )
+
+        else:
+
+            cursor.execute(
+                """
+                DELETE FROM cart
+                WHERE username = %s
+                AND product_id = %s
+                """,
+                (username, product_id)
+            )
+
+        db.commit()
+
+    cursor.close()
+
+    return redirect(url_for("cart"))
 # =========================================
 # CHECKOUT
 # =========================================
