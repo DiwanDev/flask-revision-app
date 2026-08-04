@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 
 {% block title %}
-    Login
+    Sign Up
 {% endblock %}
 
 {% block content %}
 
-<div class="login-page">
+<div class="signup-page">
 
-    <div class="login-box">
+    <div class="signup-box">
 
-        <h1>Login</h1>
+        <h1>Create Account</h1>
 
         {% if message %}
             <p class="form-message">
@@ -19,7 +19,7 @@
         {% endif %}
 
         <form
-            action="{{ url_for('login') }}"
+            action="{{ url_for('signup') }}"
             method="POST"
         >
 
@@ -32,6 +32,8 @@
                 id="username"
                 name="username"
                 placeholder="Enter username"
+                minlength="3"
+                maxlength="20"
                 required
             >
 
@@ -44,38 +46,36 @@
                 id="password"
                 name="password"
                 placeholder="Enter password"
+                minlength="6"
+                maxlength="50"
                 required
             >
 
-            <div class="remember-section">
+            <label for="confirm_password">
+                Confirm Password
+            </label>
 
-                <input
-                    type="checkbox"
-                    id="remember"
-                    name="remember"
-                >
-
-                <label for="remember">
-                    Remember Me
-                </label>
-
-            </div>
+            <input
+                type="password"
+                id="confirm_password"
+                name="confirm_password"
+                placeholder="Enter password again"
+                minlength="6"
+                maxlength="50"
+                required
+            >
 
             <button type="submit">
-                Login
+                Sign Up
             </button>
 
         </form>
 
         <p>
-            Forgot Password?
-        </p>
+            Already have an account?
 
-        <p>
-            Don't have an account?
-
-            <a href="{{ url_for('signup') }}">
-                Sign Up
+            <a href="{{ url_for('login') }}">
+                Login
             </a>
         </p>
 

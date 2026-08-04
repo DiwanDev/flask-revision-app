@@ -887,3 +887,272 @@ a {
     background-color: #f7fafa !important;
     color: #c45500 !important;
 }
+/* =========================================
+   LOGIN AND SIGNUP PAGES
+========================================= */
+
+.login-page,
+.signup-page {
+    min-height: calc(100vh - 70px);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 40px 20px;
+
+    background-color: #eaeded;
+}
+
+
+/* Login and signup card */
+
+.login-box,
+.signup-box {
+    width: 100%;
+    max-width: 420px;
+
+    padding: 32px;
+
+    background-color: white;
+
+    border: 1px solid #d5d9d9;
+    border-radius: 10px;
+
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+
+/* Main heading */
+
+.login-box h1,
+.signup-box h1 {
+    margin: 0 0 26px;
+
+    color: #111111;
+
+    font-size: 30px;
+    font-weight: 600;
+    text-align: center;
+}
+
+
+/* Form structure */
+
+.login-box form,
+.signup-box form {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Form labels */
+
+.login-box label,
+.signup-box label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #111111;
+
+    font-size: 15px;
+    font-weight: 600;
+}
+
+
+/* Username and password inputs */
+
+.login-box input[type="text"],
+.login-box input[type="password"],
+.signup-box input[type="text"],
+.signup-box input[type="password"] {
+    display: block;
+
+    width: 100%;
+    height: 44px;
+
+    margin-bottom: 20px;
+    padding: 10px 12px;
+
+    color: #111111;
+    background-color: white;
+
+    border: 1px solid #888c8c;
+    border-radius: 5px;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+
+    outline: none;
+}
+
+
+/* Input focus effect */
+
+.login-box input[type="text"]:focus,
+.login-box input[type="password"]:focus,
+.signup-box input[type="text"]:focus,
+.signup-box input[type="password"]:focus {
+    border-color: #007185;
+
+    box-shadow:
+        0 0 0 1px #007185,
+        0 0 0 3px rgba(0, 113, 133, 0.18);
+}
+
+
+/* Input placeholder */
+
+.login-box input::placeholder,
+.signup-box input::placeholder {
+    color: #767676;
+}
+
+
+/* Login and signup buttons */
+
+.login-box button,
+.signup-box button {
+    width: 100%;
+    min-height: 44px;
+
+    margin-top: 5px;
+    padding: 10px 18px;
+
+    background-color: #ffd814;
+    color: #111111;
+
+    border: 1px solid #fcd200;
+    border-radius: 8px;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+/* Button hover */
+
+.login-box button:hover,
+.signup-box button:hover {
+    background-color: #f7ca00;
+    border-color: #f2c200;
+}
+
+
+/* Button click */
+
+.login-box button:active,
+.signup-box button:active {
+    background-color: #eec000;
+}
+
+
+/* Remember-me area */
+
+.remember-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-top: -5px;
+    margin-bottom: 18px;
+}
+
+
+.remember-section input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+
+    margin: 0;
+
+    cursor: pointer;
+}
+
+
+.remember-section label {
+    margin: 0;
+
+    font-size: 14px;
+    font-weight: 400;
+
+    cursor: pointer;
+}
+
+
+/* Text below the form */
+
+.login-box p,
+.signup-box p {
+    margin: 20px 0 0;
+
+    color: #565959;
+
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+
+/* Links */
+
+.login-box a,
+.signup-box a {
+    color: #007185;
+
+    font-weight: 600;
+    text-decoration: none;
+}
+
+
+.login-box a:hover,
+.signup-box a:hover {
+    color: #c7511f;
+
+    text-decoration: underline;
+}
+
+
+/* Error or success message */
+
+.form-message {
+    margin: 0 0 20px !important;
+    padding: 11px 13px;
+
+    color: #b12704 !important;
+    background-color: #fff3f0;
+
+    border: 1px solid #cc0c39;
+    border-radius: 5px;
+
+    font-size: 14px !important;
+    font-weight: 600;
+    text-align: left !important;
+}
+
+
+/* Mobile screen */
+
+@media (max-width: 500px) {
+
+    .login-page,
+    .signup-page {
+        align-items: flex-start;
+
+        padding: 25px 14px;
+    }
+
+    .login-box,
+    .signup-box {
+        padding: 25px 20px;
+    }
+
+    .login-box h1,
+    .signup-box h1 {
+        font-size: 26px;
+    }
+}

@@ -1,17 +1,41 @@
 {% extends "base.html" %}
 
+{% block title %}
+    Home
+{% endblock %}
+
 {% block content %}
 
-<h1>Welcome to Flask Revision App</h1>
+<div class="home-page">
 
-<p>Please choose an option:</p>
+    <div class="home-box">
 
-<a href="/login">
-    <button>Sign In</button>
-</a>
+        <h1>
+            Welcome, {{ username }}
+        </h1>
 
-<a href="/signup">
-    <button>Sign Up</button>
-</a>
+        <p>
+            You have logged in successfully.
+        </p>
+
+        <div class="home-actions">
+
+            <a href="{{ url_for('products') }}">
+                View Products
+            </a>
+
+            <a href="{{ url_for('cart') }}">
+                View Cart
+            </a>
+
+            <a href="{{ url_for('logout') }}">
+                Logout
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
 
 {% endblock %}

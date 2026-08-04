@@ -1,21 +1,41 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import (
+    Flask,
+    render_template,
+    request,
+    session,
+    redirect,
+    url_for,
+)
+
 import mysql.connector
 import os
 from dotenv import load_dotenv
 
 
+# =========================================
+# LOAD ENVIRONMENT VARIABLES
+# =========================================
+
 load_dotenv()
 
+
+# =========================================
+# CREATE FLASK APPLICATION
+# =========================================
 
 app = Flask(__name__)
 app.secret_key = "mysecretkey"
 
 
+# =========================================
+# MYSQL CONNECTION
+# =========================================
+
 db = mysql.connector.connect(
     host="localhost",
     user="root",
     password=os.getenv("MYSQL_PASSWORD"),
-    database="flask_db"
+    database="flask_db",
 )
 
 
@@ -30,10 +50,15 @@ if db.is_connected():
 @app.route("/")
 def home():
 
-    if "username" in session:
-        return redirect(url_for("products"))
+    if "username" not in session:
+        return redirect(url_for("login"))
 
-    return render_template("login.html")
+    username = session["username"]
+
+    return render_template(
+        "home.html",
+        username=username,
+    )
 
 
 # =========================================
@@ -70,7 +95,7 @@ def dashboard():
 
     return render_template(
         "dashboard.html",
-        username=username
+        username=username,
     )
 
 
@@ -82,25 +107,32 @@ def dashboard():
 def login():
 
     if "username" in session:
-        return redirect(url_for("products"))
+        return redirect(url_for("home"))
 
     if request.method == "POST":
 
-        username = request.form.get("username")
-        password = request.form.get("password")
+        username = request.form.get(
+            "username",
+            "",
+        ).strip()
+
+        password = request.form.get(
+            "password",
+            "",
+        )
 
         if not username:
 
             return render_template(
                 "login.html",
-                message="Username is required"
+                message="Username is required.",
             )
 
         if not password:
 
             return render_template(
                 "login.html",
-                message="Password is required"
+                message="Password is required.",
             )
 
         cursor = db.cursor(dictionary=True)
@@ -112,7 +144,7 @@ def login():
             WHERE username = %s
             AND password = %s
             """,
-            (username, password)
+            (username, password),
         )
 
         user = cursor.fetchone()
@@ -123,27 +155,11 @@ def login():
 
             session["username"] = user["username"]
 
-            # The cart is stored as a dictionary:
-            # product_id -> quantity
-            #
-            # Example:
-            # {
-            #     "7": 2,
-            #     "8": 1
-            # }
-
-            if "cart" not in session:
-                session["cart"] = {}
-
-            # Convert an old list-format cart into a dictionary.
-            if not isinstance(session["cart"], dict):
-                session["cart"] = {}
-
-            return redirect(url_for("products"))
+            return redirect(url_for("home"))
 
         return render_template(
             "login.html",
-            message="Invalid Username or Password"
+            message="Invalid username or password.",
         )
 
     return render_template("login.html")
@@ -157,25 +173,123 @@ def login():
 def signup():
 
     if "username" in session:
-        return redirect(url_for("products"))
+        return redirect(url_for("home"))
 
     if request.method == "POST":
 
-        username = request.form.get("username")
-        password = request.form.get("password")
+        username = request.form.get(
+            "username",
+            "",
+        ).strip()
+
+        password = request.form.get(
+            "password",
+            "",
+        )
+
+        confirm_password = request.form.get(
+            "confirm_password",
+            "",
+        )
 
         if not username:
 
             return render_template(
                 "signup.html",
-                message="Username is required"
+                message="Username is required.",
+            )
+
+        if len(username) < 3:
+
+            return render_template(
+                "signup.html",
+                message=(
+                    "Username must contain at least "
+                    "3 characters."
+                ),
+            )
+
+        if len(username) > 20:
+
+            return render_template(
+                "signup.html",
+                message=(
+                    "Username cannot contain more "
+                    "than 20 characters."
+                ),
+            )
+
+        if not username.replace("_", "").isalnum():
+
+            return render_template(
+                "signup.html",
+                message=(
+                    "Username can contain only letters, "
+                    "numbers and underscores."
+                ),
             )
 
         if not password:
 
             return render_template(
                 "signup.html",
-                message="Password is required"
+                message="Password is required.",
+            )
+
+        if len(password) < 6:
+
+            return render_template(
+                "signup.html",
+                message=(
+                    "Password must contain at least "
+                    "6 characters."
+                ),
+            )
+
+        if len(password) > 50:
+
+            return render_template(
+                "signup.html",
+                message=(
+                    "Password cannot contain more "
+                    "than 50 characters."
+                ),
+            )
+
+        if not any(
+            character.isalpha()
+            for character in password
+        ):
+
+            return render_template(
+                "signup.html",
+                message=(
+                    "Password must contain at least "
+                    "one letter."
+                ),
+            )
+
+        if not any(
+            character.isdigit()
+            for character in password
+        ):
+
+            return render_template(
+                "signup.html",
+                message=(
+                    "Password must contain at least "
+                    "one number."
+                ),
+            )
+
+        if password != confirm_password:
+
+            return render_template(
+                "signup.html",
+                message=(
+                    "Password and confirm password "
+                    "do not match."
+                ),
             )
 
         cursor = db.cursor(dictionary=True)
@@ -186,7 +300,7 @@ def signup():
             FROM users
             WHERE username = %s
             """,
-            (username,)
+            (username,),
         )
 
         existing_user = cursor.fetchone()
@@ -197,22 +311,30 @@ def signup():
 
             return render_template(
                 "signup.html",
-                message="Username already exists"
+                message="Username already exists.",
             )
 
         cursor.execute(
             """
-            INSERT INTO users (username, password)
+            INSERT INTO users (
+                username,
+                password
+            )
             VALUES (%s, %s)
             """,
-            (username, password)
+            (username, password),
         )
 
         db.commit()
-
         cursor.close()
 
-        return redirect(url_for("login"))
+        return render_template(
+            "login.html",
+            message=(
+                "Account created successfully. "
+                "Please log in."
+            ),
+        )
 
     return render_template("signup.html")
 
@@ -227,19 +349,31 @@ def products():
     if "username" not in session:
         return redirect(url_for("login"))
 
-    search = request.args.get("search", "").strip()
-    category = request.args.get("category", "").strip()
+    search = request.args.get(
+        "search",
+        "",
+    ).strip()
+
+    category = request.args.get(
+        "category",
+        "",
+    ).strip()
 
     cursor = db.cursor(dictionary=True)
 
     if search and category:
+
+        search_value = "%" + search + "%"
 
         cursor.execute(
             """
             SELECT *
             FROM products
             WHERE
-                (store_type IS NULL OR store_type != 'eyewear')
+                (
+                    store_type IS NULL
+                    OR store_type != 'eyewear'
+                )
             AND
                 (
                     name LIKE %s
@@ -251,21 +385,26 @@ def products():
             LIMIT 10
             """,
             (
-                "%" + search + "%",
-                "%" + search + "%",
-                "%" + search + "%",
-                category
-            )
+                search_value,
+                search_value,
+                search_value,
+                category,
+            ),
         )
 
     elif search:
+
+        search_value = "%" + search + "%"
 
         cursor.execute(
             """
             SELECT *
             FROM products
             WHERE
-                (store_type IS NULL OR store_type != 'eyewear')
+                (
+                    store_type IS NULL
+                    OR store_type != 'eyewear'
+                )
             AND
                 (
                     name LIKE %s
@@ -276,10 +415,10 @@ def products():
             LIMIT 10
             """,
             (
-                "%" + search + "%",
-                "%" + search + "%",
-                "%" + search + "%"
-            )
+                search_value,
+                search_value,
+                search_value,
+            ),
         )
 
     elif category:
@@ -289,12 +428,15 @@ def products():
             SELECT *
             FROM products
             WHERE
-                (store_type IS NULL OR store_type != 'eyewear')
+                (
+                    store_type IS NULL
+                    OR store_type != 'eyewear'
+                )
             AND category = %s
             ORDER BY id
             LIMIT 10
             """,
-            (category,)
+            (category,),
         )
 
     else:
@@ -323,7 +465,7 @@ def products():
         "products.html",
         products=products_data,
         search=search,
-        category=category
+        category=category,
     )
 
 
@@ -333,7 +475,7 @@ def products():
 
 @app.route(
     "/add-to-cart/<int:product_id>",
-    methods=["POST"]
+    methods=["POST"],
 )
 def add_to_cart(product_id):
 
@@ -350,13 +492,15 @@ def add_to_cart(product_id):
         FROM products
         WHERE id = %s
         """,
-        (product_id,)
+        (product_id,),
     )
 
     product = cursor.fetchone()
 
     if product is None:
+
         cursor.close()
+
         return redirect(url_for("products"))
 
     cursor.execute(
@@ -366,7 +510,7 @@ def add_to_cart(product_id):
         WHERE username = %s
         AND product_id = %s
         """,
-        (username, product_id)
+        (username, product_id),
     )
 
     cart_item = cursor.fetchone()
@@ -382,7 +526,7 @@ def add_to_cart(product_id):
                 WHERE username = %s
                 AND product_id = %s
                 """,
-                (username, product_id)
+                (username, product_id),
             )
 
     else:
@@ -398,17 +542,23 @@ def add_to_cart(product_id):
                 )
                 VALUES (%s, %s, 1)
                 """,
-                (username, product_id)
+                (username, product_id),
             )
 
     db.commit()
     cursor.close()
 
     return redirect(url_for("cart"))
+
+
 # =========================================
-# VIEW CART
+# INCREASE CART QUANTITY
 # =========================================
-@app.route("/increase-cart/<int:product_id>", methods=["POST"])
+
+@app.route(
+    "/increase-cart/<int:product_id>",
+    methods=["POST"],
+)
 def increase_cart(product_id):
 
     if "username" not in session:
@@ -420,14 +570,16 @@ def increase_cart(product_id):
 
     cursor.execute(
         """
-        SELECT cart.quantity, products.stock
+        SELECT
+            cart.quantity,
+            products.stock
         FROM cart
         JOIN products
-        ON cart.product_id = products.id
+            ON cart.product_id = products.id
         WHERE cart.username = %s
         AND cart.product_id = %s
         """,
-        (username, product_id)
+        (username, product_id),
     )
 
     item = cursor.fetchone()
@@ -441,7 +593,7 @@ def increase_cart(product_id):
             WHERE username = %s
             AND product_id = %s
             """,
-            (username, product_id)
+            (username, product_id),
         )
 
         db.commit()
@@ -449,6 +601,12 @@ def increase_cart(product_id):
     cursor.close()
 
     return redirect(url_for("cart"))
+
+
+# =========================================
+# VIEW CART
+# =========================================
+
 @app.route("/cart")
 def cart():
 
@@ -470,7 +628,7 @@ def cart():
         WHERE cart.username = %s
         ORDER BY cart.id DESC
         """,
-        (username,)
+        (username,),
     )
 
     cart_items = cursor.fetchall()
@@ -480,7 +638,8 @@ def cart():
     for item in cart_items:
 
         item["subtotal"] = (
-            float(item["price"]) * item["quantity"]
+            float(item["price"])
+            * item["quantity"]
         )
 
         total += item["subtotal"]
@@ -490,9 +649,18 @@ def cart():
     return render_template(
         "cart.html",
         cart_items=cart_items,
-        total=total
+        total=total,
     )
-@app.route("/decrease-cart/<int:product_id>", methods=["POST"])
+
+
+# =========================================
+# DECREASE CART QUANTITY
+# =========================================
+
+@app.route(
+    "/decrease-cart/<int:product_id>",
+    methods=["POST"],
+)
 def decrease_cart(product_id):
 
     if "username" not in session:
@@ -509,7 +677,7 @@ def decrease_cart(product_id):
         WHERE username = %s
         AND product_id = %s
         """,
-        (username, product_id)
+        (username, product_id),
     )
 
     item = cursor.fetchone()
@@ -525,7 +693,7 @@ def decrease_cart(product_id):
                 WHERE username = %s
                 AND product_id = %s
                 """,
-                (username, product_id)
+                (username, product_id),
             )
 
         else:
@@ -536,7 +704,7 @@ def decrease_cart(product_id):
                 WHERE username = %s
                 AND product_id = %s
                 """,
-                (username, product_id)
+                (username, product_id),
             )
 
         db.commit()
@@ -544,6 +712,40 @@ def decrease_cart(product_id):
     cursor.close()
 
     return redirect(url_for("cart"))
+
+
+# =========================================
+# REMOVE ITEM FROM CART
+# =========================================
+
+@app.route(
+    "/remove-from-cart/<int:product_id>",
+    methods=["POST"],
+)
+def remove_from_cart(product_id):
+
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    username = session["username"]
+
+    cursor = db.cursor()
+
+    cursor.execute(
+        """
+        DELETE FROM cart
+        WHERE username = %s
+        AND product_id = %s
+        """,
+        (username, product_id),
+    )
+
+    db.commit()
+    cursor.close()
+
+    return redirect(url_for("cart"))
+
+
 # =========================================
 # CHECKOUT
 # =========================================
@@ -569,7 +771,7 @@ def checkout():
         WHERE cart.username = %s
         ORDER BY cart.id DESC
         """,
-        (username,)
+        (username,),
     )
 
     cart_products = cursor.fetchall()
@@ -593,8 +795,10 @@ def checkout():
     return render_template(
         "checkout.html",
         cart_products=cart_products,
-        total_price=total_price
+        total_price=total_price,
     )
+
+
 # =========================================
 # PLACE ORDER
 # =========================================
@@ -605,14 +809,7 @@ def place_order():
     if "username" not in session:
         return redirect(url_for("login"))
 
-    cart_data = session.get("cart", {})
-
-    if not isinstance(cart_data, dict):
-        cart_data = {}
-        session["cart"] = {}
-
-    if not cart_data:
-        return redirect(url_for("cart"))
+    username = session["username"]
 
     full_name = request.form.get("full_name")
     phone = request.form.get("phone")
@@ -655,11 +852,34 @@ def place_order():
 
     cursor = db.cursor(dictionary=True)
 
-    ordered_products = []
-
     try:
 
-        for product_id, quantity in cart_data.items():
+        cursor.execute(
+            """
+            SELECT
+                product_id,
+                quantity
+            FROM cart
+            WHERE username = %s
+            ORDER BY id
+            """,
+            (username,),
+        )
+
+        cart_data = cursor.fetchall()
+
+        if not cart_data:
+
+            cursor.close()
+
+            return redirect(url_for("cart"))
+
+        ordered_products = []
+
+        for cart_item in cart_data:
+
+            product_id = cart_item["product_id"]
+            quantity = cart_item["quantity"]
 
             cursor.execute(
                 """
@@ -673,7 +893,7 @@ def place_order():
                 WHERE id = %s
                 FOR UPDATE
                 """,
-                (product_id,)
+                (product_id,),
             )
 
             product = cursor.fetchone()
@@ -685,7 +905,10 @@ def place_order():
 
                 return render_template(
                     "order_failed.html",
-                    message="One of your products was not found."
+                    message=(
+                        "One of your products "
+                        "was not found."
+                    ),
                 )
 
             if product["stock"] < quantity:
@@ -698,7 +921,7 @@ def place_order():
                     message=(
                         product["name"]
                         + " does not have enough stock."
-                    )
+                    ),
                 )
 
             cursor.execute(
@@ -707,39 +930,45 @@ def place_order():
                 SET stock = stock - %s
                 WHERE id = %s
                 """,
-                (quantity, product_id)
+                (quantity, product_id),
             )
 
             product["quantity"] = quantity
 
             product["subtotal"] = (
-                float(product["price"]) * quantity
+                float(product["price"])
+                * quantity
             )
 
             ordered_products.append(product)
+
+        cursor.execute(
+            """
+            DELETE FROM cart
+            WHERE username = %s
+            """,
+            (username,),
+        )
 
         db.commit()
 
     except mysql.connector.Error as error:
 
         db.rollback()
-        cursor.close()
 
         print("Order error:", error)
+
+        cursor.close()
 
         return render_template(
             "order_failed.html",
             message=(
                 "Something went wrong while "
                 "placing your order."
-            )
+            ),
         )
 
     cursor.close()
-
-    # Clear the cart after a successful order.
-    session["cart"] = {}
-    session.modified = True
 
     return render_template(
         "order_success.html",
@@ -754,7 +983,7 @@ def place_order():
         country=country,
         instructions=instructions,
         payment_method=payment_method,
-        ordered_products=ordered_products
+        ordered_products=ordered_products,
     )
 
 
@@ -779,7 +1008,7 @@ def orders():
             WHERE username = %s
             ORDER BY id DESC
             """,
-            (session["username"],)
+            (session["username"],),
         )
 
         orders_data = cursor.fetchall()
@@ -794,7 +1023,7 @@ def orders():
 
     return render_template(
         "orders.html",
-        orders=orders_data
+        orders=orders_data,
     )
 
 
@@ -808,8 +1037,20 @@ def clear_cart():
     if "username" not in session:
         return redirect(url_for("login"))
 
-    session["cart"] = {}
-    session.modified = True
+    username = session["username"]
+
+    cursor = db.cursor()
+
+    cursor.execute(
+        """
+        DELETE FROM cart
+        WHERE username = %s
+        """,
+        (username,),
+    )
+
+    db.commit()
+    cursor.close()
 
     return redirect(url_for("products"))
 
@@ -852,31 +1093,6 @@ def test_db():
 # =========================================
 # RUN FLASK
 # =========================================
-@app.route(
-    "/remove-from-cart/<int:product_id>",
-    methods=["POST"]
-)
-def remove_from_cart(product_id):
 
-    if "username" not in session:
-        return redirect(url_for("login"))
-
-    username = session["username"]
-
-    cursor = db.cursor()
-
-    cursor.execute(
-        """
-        DELETE FROM cart
-        WHERE username = %s
-        AND product_id = %s
-        """,
-        (username, product_id)
-    )
-
-    db.commit()
-    cursor.close()
-
-    return redirect(url_for("cart"))
 if __name__ == "__main__":
     app.run(debug=True)
