@@ -40,9 +40,9 @@ db = mysql.connector.connect(
 
 
 if db.is_connected():
-    print("Connected to MySQL successfully!")
-
-
+    app.logger.info(
+        "Connected to MySQL successfully!"
+    )
 # =========================================
 # HOME
 # =========================================
@@ -155,12 +155,22 @@ def login():
 
             session["username"] = user["username"]
 
+            app.logger.info(
+                "User %s logged in successfully",
+                user["username"],
+            )
+
             return redirect(url_for("home"))
 
+        app.logger.warning(
+                "Failed login attempt for username: %s",
+                username,
+            )
+
         return render_template(
-            "login.html",
-            message="Invalid username or password.",
-        )
+                "login.html",
+                message="Invalid username or password.",
+            )
 
     return render_template("login.html")
 
