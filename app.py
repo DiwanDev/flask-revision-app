@@ -5,6 +5,7 @@ from flask import (
     session,
     redirect,
     url_for,
+    abort,
 )
 
 import mysql.connector
@@ -1109,6 +1110,29 @@ def page_not_found(error):
     return render_template(
         "404.html"
     ), 404
+
+@app.route("/product-test/<int:product_id>")
+def product_test(product_id):
+
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute(
+        """
+        SELECT *
+        FROM products
+        WHERE id = %s
+        """,
+        (product_id,),
+    )
+
+    product = cursor.fetchone()
+
+    cursor.close()
+
+    if product is None:
+        abort(404)
+
+    return str(product)
 # =========================================
 # RUN FLASK
 # =========================================
