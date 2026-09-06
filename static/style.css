@@ -1105,7 +1105,7 @@ a {
     color: #007185;
 
     font-weight: 600;
-    text-decoration: none;
+    
 }
 
 
@@ -1126,7 +1126,7 @@ a {
     color: #b12704 !important;
     background-color: #fff3f0;
 
-    border: 1px solid black;
+    border: 1px solid blue;
     border-radius: 5px;
 
     font-size: 14px !important;
